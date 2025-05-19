@@ -1,0 +1,45 @@
+@mixin plastic-light {
+    --bg: var(--c90);
+    --text: var(--c10);
+    --shadow: color-mix(in srgb, var(--c60), transparent 75%);
+    --border: var(--c50);
+}
+
+@mixin plastic-accent {
+    --bg: var(--c60);
+    --text: var(--c95);
+    --shadow: color-mix(in srgb, var(--c50), transparent 50%);
+    --border: var(--c50);
+}
+
+@mixin plastic-dark {
+    --bg: var(--c20);
+    --text: var(--c90);
+    --shadow: color-mix(in srgb, var(--c30), transparent 50%);
+    --border: var(--c10);
+}
+
+.plastic { 
+    @include plastic-light();
+
+    --elevation: 2px;
+    --plastic-box-shadow: 
+        var(--plastic-drop-box-shadow);
+
+    background-color: var(--bg);
+    color: var(--text);
+    border-radius: 1rem;
+    box-shadow: var(--plastic-box-shadow);
+    border: 2px solid var(--border);
+
+    @media (prefers-color-scheme: dark) {
+        @include plastic-dark();
+        --plastic-box-shadow: 
+            var(--plastic-drop-box-shadow);
+    }
+
+    &.accent {
+        @extend .plastic;
+        @include plastic-accent();
+    }
+}

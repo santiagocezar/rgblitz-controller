@@ -1,0 +1,186 @@
+@use 'sass:color';
+@use 'sass:string';
+@use 'sass:math';
+
+
+@function rel($ch, $value) {
+    @if $lightness > 0 {
+        @return calc(#{$ch} + ((1 - #{$ch}) * calc($value / 100%)));
+    } @else {
+        @return calc(#{$ch} - (#{$ch} * calc($value / 100%)));
+    }
+}
+
+@function okscale($base, $chroma, $lightness, $dynamic: false) {
+    @if $dynamic {
+        $rc: rel(c, $chroma);
+        $rl: rel(l, $lightness);
+        @return oklch(from $base $rl $rc h);
+    } @else {
+        @return color.scale($base, $chroma: $chroma, $lightness: $lightness, $space: oklch);
+    }
+}
+
+@function brightness($color) {
+    @return round(
+        (color.channel($color, "red", $space: rgb) * 299) +
+        (color.channel($color, "green", $space: rgb) * 587) +
+        (color.channel($color, "blue", $space: rgb) * 0.114)
+    );
+}
+
+@function contrasting($color) {
+    @if brightness($color) < math.div(brightness(white), 2) {
+        @return white;
+    } @else {
+        @return black;
+    }
+}
+
+@function two-digit($i) {
+    @return string.slice("0" + $i, -2, -1);
+}
+
+@debug two-digit(20);
+@debug two-digit(2);
+@debug two-digit(17);
+@debug two-digit(199);
+
+// FIXME: kinda pointless since sass doesn't sovle the relative color functions
+@mixin palette($base) {
+    $base: color.to-space($base, oklch);
+    $baseLightness: calc(color.channel($base, "lightness", $space: oklch) / 100%);
+    $baseChroma: color.channel($base, "chroma", $space: oklch);
+    $baseHue: calc(color.channel($base, "hue", $space: oklch) / 1deg);
+    @for $i from 0 through 19 {
+        $L: math.div($i, 19);
+        $C: math.min(
+            calc($baseChroma / $baseLightness * $L),
+            calc($baseChroma / ($baseLightness - 1) * ($L - $baseLightness) + $baseChroma)
+        );
+        $H: calc($baseHue + $L * 0);
+
+        --c#{two-digit($i * 5)}: #{oklch($L $C $H)}; 
+        --k#{two-digit($i * 5)}: #{oklch($L $C calc($H + 180))}; 
+        @if $i == 5 {
+            // --contrast: #{contrasting($c)};
+        }
+    }
+}
+
+.palette-dynamic {
+    @for $i from 0 through 19 {
+        $L: math.div($i, 19);
+        --c#{two-digit($i * 5)}: oklch(
+            from var(--base)
+            #{$L}
+            min(
+                c / l * #{$L},
+                c / (l - 1) * (#{$L} - l) + c
+            )
+            calc(h + #{$L * 0})
+        );
+        --k#{two-digit($i * 5)}: oklch(
+            from var(--base)
+            #{$L}
+            min(
+                c / l * #{$L},
+                c / (l - 1) * (#{$L} - l) + c
+            )
+            calc(h + #{$L * 0} + 180)
+        );
+    }
+
+    @media (prefers-color-scheme: dark) {
+
+    }
+}
+
+.palette-primary {
+    @include palette(#4156fd);
+}
+
+.palette-secondary {
+    @include palette(#00ee8d);
+}
+
+.palette-evil {
+    @include palette(#ee005b);
+}
+
+.palette-neutral {
+    @include palette(#302a27);
+}
+.surface-colors {
+    --bg0: var(--c80);
+    --bg1: var(--c85);
+    --bg2: var(--c90);
+    --bg3: var(--c95);
+    --bg4: white;
+
+    @media (prefers-color-scheme: dark) {
+        --bg0: var(--c30);
+        --bg1: var(--c25);
+        --bg2: var(--c20);
+        --bg3: var(--c15);
+        --bg4: var(--c10);
+    }
+}
+
+:root {
+    @extend .palette-neutral;
+    @extend .surface-colors;
+
+    --text: #000;
+    --textContrast: #fff;
+    --secondaryText: #0008;
+    --secondaryTextContrast: #fff8;
+
+    --shadow: #0002;
+
+    --redl: #ff7fd4;
+    --red: #fe1e6e;
+    --redd: #630081;
+
+
+    --yellowl: #fff67d;
+    --yellow: #ffc51a;
+    --yellowd: #ac4204;
+
+    --bluel: #5ab5f1;
+    --blue: #2c37de;
+    --blued: #31108b;
+
+    --greenl: #80ee7c;
+    --green: #28db67;
+    --greend: #06634f;
+
+    background-color: var(--bg1);
+    color: var(--text);
+
+    @media (prefers-color-scheme: dark) {
+        --text: #eee;
+        --textContrast: #111;
+        --secondaryText: #eee8;
+        --secondaryTextContrast: #1118;
+
+        --shadow: #ddd2;
+
+        --redl: #ff7fd4;
+        --red: #fe1e6e;
+        --redd: #630081;
+
+
+        --yellowl: #fff67d;
+        --yellow: #ffc51a;
+        --yellowd: #ac4204;
+
+        --bluel: #5ab5f1;
+        --blue: #2c37de;
+        --blued: #31108b;
+
+        --greenl: #80ee7c;
+        --green: #28db67;
+        --greend: #06634f;
+    }
+}

@@ -1,0 +1,23 @@
+.input-label-box {
+    background-color: var(--bg3);
+    border-radius: 1rem;
+
+    
+    --box-shadow: 
+        0 2px 1px -1px inset var(--bg1),
+        0 2px 8px var(--bg1) inset;
+    
+    box-shadow: var(--box-shadow);
+        
+    &:focus-within {
+        box-shadow: var(--box-shadow), 0 0 0 2px var(--bluel);
+    }
+}
+
+.input-label {
+    user-select: none;
+    font-size: .75rem;
+    height: 1rem;
+    padding: 0 .75rem;
+    opacity: .75;
+}
