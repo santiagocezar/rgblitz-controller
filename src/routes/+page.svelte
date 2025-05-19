@@ -40,7 +40,7 @@
         return 100 - 100 * deltaC(colorA, colorB) / MAX_DELTA_C
     }
 
-    const ws = new SvelteWebSocket("http://192.168.89.179/ws")
+    const ws = new SvelteWebSocket("http://192.168.132.24/ws")
 
     $effect(() => {
         const data = new Uint8Array([1, ...color1]).buffer
