@@ -86,7 +86,7 @@
         return 100 - Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2)
     }
 
-    const client = mqtt.connect("ws://broker.emqx.io:8083/mqtt", {
+    const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
         username: "santiagocezar",
         password: "rgblitz0401",
 
@@ -94,11 +94,13 @@
 
     $effect(() => {
         const data = new Uint8Array([1, ...color1])
+        // @ts-expect-error it can actually handle the Uint8Array
         client.publish("santiagocezar/rgblitz", data)
     })
 
     $effect(() => {
         const data = new Uint8Array([2, ...color2])
+        // @ts-expect-error it can actually handle the Uint8Array
         client.publish("santiagocezar/rgblitz", data)
     })
     
