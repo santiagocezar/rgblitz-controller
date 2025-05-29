@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="48" height="48" version="1.1" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+ <g stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+  <path d="m18.107 29.795a15 15 0 0 1-9-12 15 15 0 0 0-9.1074 13.793 15 15 0 0 0 15 15 15 15 0 0 0 9-3.0117 15 15 0 0 1-6-11.988 15 15 0 0 1 0.10742-1.793z" fill="#0f0" style="paint-order:stroke fill markers"/>
+  <path d="m38.893 17.795a15 15 0 0 1-9 12 15 15 0 0 1 0.10742 1.793 15 15 0 0 1-6 11.988 15 15 0 0 0 9 3.0117 15 15 0 0 0 15-15 15 15 0 0 0-9.1074-13.793z" fill="#00f" style="paint-order:stroke fill markers"/>
+  <path d="m29.893 29.795a15 15 0 0 1-5.8926 1.2051 15 15 0 0 1-5.8926-1.2051 15 15 0 0 0-0.10742 1.793 15 15 0 0 0 6 11.988 15 15 0 0 0 6-11.988 15 15 0 0 0-0.10742-1.793z" fill="#0ff" style="paint-order:stroke fill markers"/>
+  <path d="m24 1a15 15 0 0 0-15 15 15 15 0 0 0 0.10742 1.7949 15 15 0 0 1 5.8926-1.207 15 15 0 0 1 9 3.0176 15 15 0 0 1 9-3.0176 15 15 0 0 1 5.8926 1.207 15 15 0 0 0 0.10742-1.7949 15 15 0 0 0-15-15z" fill="#f00" style="paint-order:stroke fill markers"/>
+  <path d="m38.893 17.795a15 15 0 0 0-5.8926-1.207 15 15 0 0 0-9 3.0176 15 15 0 0 1 5.8926 10.189 15 15 0 0 0 9-12z" fill="#f0f" style="paint-order:stroke fill markers"/>
+  <path d="m29.893 29.795a15 15 0 0 0-5.8926-10.189 15 15 0 0 0-5.8926 10.189 15 15 0 0 0 5.8926 1.2051 15 15 0 0 0 5.8926-1.2051z" fill="#fff" style="paint-order:stroke fill markers"/>
+  <path d="m18.107 29.795a15 15 0 0 1 5.8926-10.189 15 15 0 0 0-9-3.0176 15 15 0 0 0-5.8926 1.207 15 15 0 0 0 9 12z" fill="#ff0" style="paint-order:stroke fill markers"/>
+ </g>
+</svg>
