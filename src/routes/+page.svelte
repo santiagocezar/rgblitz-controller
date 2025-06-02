@@ -158,7 +158,7 @@
     <div class="rgb">
         {#each color1 as comp, i}
             <div class="bulb" style="--c: {cssPrimarios[i]}; --bg4: #000; --text: {referenciaPrimarios[i]}">
-                <Dial bind:value={() => color1[i] / 255, (v) => color1[i] = v * 255} />
+                <Dial bind:value={() => color1[i] / 255, (v) => color1[i] = Math.round(v * 20) / 20 * 255} />
                 <!-- <input type="number" min="0" max="255" bind:value={components[i]}> -->
             </div>
         {/each}
