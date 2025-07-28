@@ -16,10 +16,13 @@
 		"@sveltejs/adapter-auto": "^6.0.1",
 		"@sveltejs/kit": "^2.21.1",
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
+		"@unocss/preset-icons": "^66.3.2",
+		"@unocss/preset-wind4": "^66.3.2",
 		"sass-embedded": "^1.89.0",
 		"svelte": "^5.33.8",
 		"svelte-check": "^4.2.1",
 		"typescript": "^5.8.3",
+		"unocss": "^66.3.2",
 		"unplugin-icons": "^22.1.0",
 		"vite": "^6.3.5"
 	},
@@ -30,6 +33,8 @@
 	},
 	"dependencies": {
 		"@sveltejs/adapter-static": "^3.0.8",
-		"mqtt": "^5.13.0"
+		"@tailwindcss/vite": "^4.1.11",
+		"mqtt": "^5.13.0",
+		"tailwindcss": "^4.1.11"
 	}
 }

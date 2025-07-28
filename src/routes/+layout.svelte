@@ -1,6 +1,6 @@
 <script>
-import '$lib/style/global.scss'
-import '$lib/style/reset.css'
+    import '$lib/style/global.scss'
+    import '../app.css'
 </script>
 
 <svelte:head>
