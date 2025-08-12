@@ -36,8 +36,8 @@
 
 	$effect(() => {
 		client
-			.subscribe("santiagocezar/rgblitz")
-			.subscribe("santiagocezar/rgblitz-out");
+			.subscribe("santiagocezar/rgblitz/clients")
+			.subscribe("santiagocezar/rgblitz/game");
 	});
 
 	async function sayHello() {
@@ -58,13 +58,13 @@
 		data.set(clientID, 1);
 		data.set(nameBytes, 1 + clientID.length);
 		// @ts-expect-error it can actually handle the Uint8Array
-		await client.publishAsync("santiagocezar/rgblitz", data);
+		await client.publishAsync("santiagocezar/rgblitz/clients", data);
 	}
 
 	async function sendColor(color: Color) {
 		const data = new Uint8Array([GUESS_COLOR, ...clientID, ...color]);
 		// @ts-expect-error it can actually handle the Uint8Array
-		client.publish("santiagocezar/rgblitz", data);
+		client.publish("santiagocezar/rgblitz/clients", data);
 	}
 
 	$effect(() => {

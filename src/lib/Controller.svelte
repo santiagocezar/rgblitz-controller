@@ -65,7 +65,7 @@
 <main class="grid grid-rows-[auto_1fr_auto] bg-black h-full overflow-clip">
 	<header
 		class={{
-			"z-10 w-full rounded-b-[100%_20%] h-40 flex flex-col items-center justify-evenly": true,
+			"z-10 w-full rounded-b-[100%_20%] h-40 flex flex-col items-center justify-evenly pb-2": true,
 			"bg-green-950": !winning,
 			"bg-green-400 text-black": winning,
 		}}
@@ -90,12 +90,20 @@
 			: ownDistance > 20 ? "Frío"
 			: "Muy frio, helado."}
 		</div>
-		<p>
-			<span class="text-4xl font-900">
-				{puntos}
-			</span>
-			<span class="text-xl font-900"> puntos </span>
-		</p>
+		<div class="flex w-full px-4 justify-between">
+			<p>
+				<span class="text-4xl font-900">
+					{puntos}
+				</span>
+				<span class="text-xl font-900"> puntos </span>
+			</p>
+			<p>
+				<span class="text-xl font-900"> quedan </span>
+				<span class="text-4xl font-900">
+					{puntos}
+				</span><span class="text-xl font-900">s</span>
+			</p>
+		</div>
 	</header>
 
 	<div class="h-full grid items-center p-2">
@@ -107,7 +115,11 @@
 			<Refresh />
 		</button> -->
 		<!-- <div class="grow"></div> -->
-		<button onclick={() => (mix = !mix)} class="grow light-toggle">
+		<button
+			onclick={() => (mix = !mix)}
+			data-mix={mix}
+			class="grow light-toggle"
+		>
 			<Bulb />
 		</button>
 		<button onclick={check} class="grow check-button">
