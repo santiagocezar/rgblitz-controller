@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="25.4mm"
+   height="25.4mm"
+   viewBox="0 0 25.4 25.4"
+   version="1.1"
+   id="svg1"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient7">
+      <stop
+         style="stop-color:#eeaaff;stop-opacity:1"
+         offset="0"
+         id="stop8" />
+      <stop
+         style="stop-color:#00ffff;stop-opacity:1"
+         offset="1"
+         id="stop7" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#linearGradient7"
+       id="linearGradient8"
+       x1="57.319794"
+       y1="71.809555"
+       x2="76.657234"
+       y2="77.083405"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(-1.1317304,0,0,-1.1317304,143.83209,113.41497)" />
+    <filter
+       style="color-interpolation-filters:sRGB"
+       id="filter9"
+       x="-0.071443197"
+       y="-0.071443197"
+       width="1.1428864"
+       height="1.1428864">
+      <feGaussianBlur
+         stdDeviation="0.4391404"
+         id="feGaussianBlur9" />
+    </filter>
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-55.932988,-17.685045)">
+    <rect
+       style="opacity:1;fill:#164450;fill-opacity:1;stroke-width:0.132292;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers"
+       id="rect9"
+       width="6.699729"
+       height="3.3498645"
+       x="-73.805183"
+       y="-39.691418"
+       ry="1.238991"
+       transform="matrix(-0.70710678,-0.70710678,-0.70710678,0.70710678,0,0)" />
+    <circle
+       style="opacity:1;fill:#164450;stroke-width:0.132292;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers"
+       id="path6"
+       cx="68.817513"
+       cy="30.592016"
+       r="10.617689" />
+    <circle
+       style="opacity:1;fill:#d7eef4;stroke-width:0.132292;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers"
+       id="circle6"
+       cx="68.666237"
+       cy="29.953775"
+       r="9.2189293" />
+    <path
+       id="path8"
+       style="opacity:1;fill:url(#linearGradient8);fill-opacity:1;stroke-width:0.132292;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers"
+       d="m 60.013741,26.772513 a 9.2189289,9.2189289 0 0 0 -0.566708,3.181519 9.2189289,9.2189289 0 0 0 9.219384,9.218799 9.2189289,9.2189289 0 0 0 9.137508,-7.997658 z" />
+    <circle
+       style="opacity:0.5;fill:#ffffff;stroke-width:0.118723;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers;filter:url(#filter9)"
+       id="circle9"
+       cx="68.519173"
+       cy="73.364449"
+       r="7.3760486"
+       transform="matrix(1.1317304,0,0,1.0971209,-8.8789924,-51.115363)" />
+    <path
+       style="opacity:1;fill:#ff0000;stroke-width:0.132292;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers"
+       d="m 67.377593,22.622626 -0.371143,10.067187 7.338485,-0.139178 0.324749,-2.319627 h -5.018856 l 0.04639,-7.701166 z"
+       id="path9" />
+  </g>
+</svg>

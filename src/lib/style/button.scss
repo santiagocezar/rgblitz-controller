@@ -1,37 +1,38 @@
 @use './palette.scss';
 @use './plastic.scss';
 
-button {
-    @extend .plastic;
-}
-
-button.important:not(.normal) ,
-button[type="submit"]:not(.normal) {
-    @extend .palette-primary, .accent;
-}
-
-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1rem;
-    gap: 0.5rem;
-    height: 3rem;
-    border-radius: 1rem;
-    font-weight: bold;
-    user-select: none;
-    cursor: pointer;
-}
-
-button:disabled {
-    color: color-mix(in srgb, var(--text), transparent 50%);
-}
-
-button:disabled,
-button:active {    
-    box-shadow: none;
-}
-
-.button {
-    @extend button;
+@layer base {
+    button {
+        cursor: pointer;
+    }
+    .button {
+        @extend .plastic;
+    }
+    
+    .button.important:not(.normal) ,
+    .button[type="submit"]:not(.normal) {
+        @extend .palette-primary, .accent;
+    }
+    
+    .button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1rem;
+        gap: 0.5rem;
+        height: 3rem;
+        border-radius: 1rem;
+        font-weight: bold;
+        user-select: none;
+        cursor: pointer;
+    }
+    
+    .button:disabled {
+        color: color-mix(in srgb, var(--text), transparent 50%);
+    }
+    
+    .button:disabled,
+    .button:active {    
+        box-shadow: none;
+    }
 }

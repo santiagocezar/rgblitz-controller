@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+@theme {
+    --font-sans: "Sour Gummy", sans-serif;
+    --font-mono: "Kode Mono", monospace;
+}

@@ -1,46 +1,39 @@
 <script lang="ts">
-	import { SvelteWebSocket } from "$lib/util.svelte";
-	import bingbong from "$lib/assets/bingbong.ogg";
-	import Dial from "$lib/Dial.svelte";
+	import clock from "$lib/assets/clock.svg";
+	import star from "$lib/assets/star.svg";
 
 	import Bulb from "~icons/hugeicons/bulb";
 	import Tick from "~icons/hugeicons/sent";
-	import Refresh from "~icons/hugeicons/refresh";
-	import mqtt from "mqtt";
 	import ColorDials from "./ColorDials.svelte";
+	import Wave from "./Wave.svelte";
+	import Game, { type Color } from "./game.svelte";
+	import NumberFlow from "@number-flow/svelte";
+	import { makeToast } from "./toasts/state.svelte";
 
 	interface Props {
-		puntos: number;
-		name: string;
-		closest: string | null;
-		closestDistance: number;
-		ownDistance: number;
-		onColorSend: (c: Color) => void;
-		onReset: () => void;
+		game: Game;
 	}
 
-	export type Color = [r: number, g: number, b: number];
-
-	const {
-		puntos,
-		name,
-		closest,
-		closestDistance,
-		ownDistance,
-		onColorSend: sendColor,
-		onReset: reset,
-	}: Props = $props();
+	const { game }: Props = $props();
 
 	let mix = $state(false);
-	const winning = $derived(closestDistance === ownDistance);
 
+	let debug = $state(false);
+
+	const winning = $derived(game.closest === game.player_closeness);
+
+	let headerColor: Color = $state([128, 128, 128]);
 	let color: Color = $state([128, 128, 128]);
 
 	function check() {
-		sendColor(color);
+		game.guessColor(color);
 	}
 
-	let audio: HTMLAudioElement;
+	function onRoundFinished(winner: string, score: number) {
+		makeToast({
+			message: winner,
+		});
+	}
 
 	$effect(() => {
 		const onSpace = (e: KeyboardEvent) => {
@@ -50,154 +43,138 @@
 			}
 		};
 		document.addEventListener("keypress", onSpace);
+
+		game.on("roundFinished", onRoundFinished);
+
 		return () => {
 			document.removeEventListener("keypress", onSpace);
+			game.off("roundFinished", onRoundFinished);
 		};
 	});
 </script>
 
-<audio bind:this={audio} src={bingbong}></audio>
-<!-- 
-<svelte:document onkeypress={(e) => {
-    e.code == "Backquote" && (debug = !debug)
-}} /> -->
+<!-- <audio bind:this={audio} src={bingbong}></audio> -->
+
+<svelte:document
+	onkeypress={(e) => {
+		e.code == "Backquote" && (debug = !debug);
+	}}
+/>
 
 <main class="grid grid-rows-[auto_1fr_auto] bg-black h-full overflow-clip">
 	<header
+		style="--c: {winning ? 'var(--color-white)' : 'var(--color-green-950)'}"
 		class={{
-			"z-10 w-full rounded-b-[100%_20%] h-40 flex flex-col items-center justify-evenly pb-2": true,
-			"bg-green-950": !winning,
-			"bg-green-400 text-black": winning,
+			"z-10 w-full pb-2": true,
+			"text-black": winning,
 		}}
 	>
-		<div class="text-lg">
-			{#if winning}
-				¡estás ganando!
-			{:else}
-				{closest} está más cerca
-			{/if}
+		<div class="bg-(--c) p-2 pb-0 flex justify-between">
+			<div
+				class="p-2 shrink-0 bg-white text-black rounded-lg grid grid-rows-2 font-mono font-bold text-4xl"
+			>
+				<div class="flex gap-2 items-center">
+					<img
+						src={star}
+						alt="puntos:"
+						class="h-12 drop-shadow-pink-400 drop-shadow-md"
+					/>
+					<span>
+						<NumberFlow value={game.score} /><span
+							class="text-base font-extrabold">pts.</span
+						>
+					</span>
+				</div>
+				<div class="flex gap-2 items-center">
+					<img
+						src={clock}
+						alt="puntos:"
+						class="h-12 drop-shadow-yellow-300 drop-shadow-md"
+					/>
+					<span>
+						{game.round_time}<span class="text-base font-extrabold"
+							>s</span
+						>
+					</span>
+				</div>
+			</div>
+			<div class="flex flex-col items-end text-right gap-2 p-2">
+				<div class="text-lg">
+					{#if winning}
+						¡estás ganando!
+					{:else}
+						{game.closest_name} está más cerca
+					{/if}
+				</div>
+				<div
+					class={{
+						"text-3xl/8 font-bold": true,
+						"animate-bounce": game.player_closeness > 60,
+					}}
+				>
+					{game.player_closeness > 80 ? "¡¡GANASTE!!"
+					: game.player_closeness > 70 ? "¡¡QUEMANDO!!"
+					: game.player_closeness > 60 ? "¡Caliente!"
+					: game.player_closeness > 50 ? "Tibio..."
+					: game.player_closeness > 20 ? "Frío"
+					: "Muy frio, helado."}
+				</div>
+			</div>
 		</div>
-		<div
-			class={{
-				"text-3xl font-bold": true,
-				"animate-bounce": ownDistance > 60,
-			}}
-		>
-			{ownDistance > 80 ? "¡¡GANASTE!!"
-			: ownDistance > 70 ? "¡¡QUEMANDO!!"
-			: ownDistance > 60 ? "¡Caliente!"
-			: ownDistance > 50 ? "Tibio..."
-			: ownDistance > 20 ? "Frío"
-			: "Muy frio, helado."}
-		</div>
-		<div class="flex w-full px-4 justify-between">
-			<p>
-				<span class="text-4xl font-900">
-					{puntos}
-				</span>
-				<span class="text-xl font-900"> puntos </span>
-			</p>
-			<p>
-				<span class="text-xl font-900"> quedan </span>
-				<span class="text-4xl font-900">
-					{puntos}
-				</span><span class="text-xl font-900">s</span>
-			</p>
-		</div>
+		<Wave f={game.player_closeness / 100} />
 	</header>
 
 	<div class="h-full grid items-center p-2">
 		<ColorDials bind:color expand={mix} />
 	</div>
 
-	<header class="z-10 flex gap-2 text-xl items-center p-2">
+	<header class="z-10 flex gap-2 text-4xl items-center p-2">
 		<!-- <button onclick={reset} class="restart-button">
 			<Refresh />
 		</button> -->
 		<!-- <div class="grow"></div> -->
 		<button
 			onclick={() => (mix = !mix)}
-			data-mix={mix}
-			class="grow light-toggle"
+			data-mix={mix || undefined}
+			class="grow flex items-center justify-center h-auto py-4 rounded-3xl bg-amber-950 data-mix:bg-amber-200 data-mix:text-black"
 		>
 			<Bulb />
 		</button>
-		<button onclick={check} class="grow check-button">
+		<button
+			onclick={check}
+			class="grow flex items-center justify-center h-auto py-4 rounded-3xl bg-teal-400 text-black"
+		>
 			<Tick />
 		</button>
 	</header>
-	<!-- {#if debug}
-        
-        <div class="debug">
-            {#snippet color(name: string, rgb: Color)}
-                {@const hsl = rgbToHsl(...rgb)}
-                <p>
-                    <span class="ref" style="background-color: rgb({rgb});"></span>
-                    {name}
-                </p>
-                <p>
-                    <strong>RGB:</strong> {rgb.map(v => v.toFixed(2)).join(", ")}
-                </p>
-                <p>
-                    <strong>H:</strong> {(hsl.h / Math.PI * 180).toFixed(2)}°
-                    <strong>S:</strong> {(hsl.s * 100).toFixed(2)}%
-                    <strong>L:</strong> {(hsl.l * 100).toFixed(2)}%
-                </p>
-            {/snippet}
-            {@render color("Color 1", color1)}
-            {@render color("Color 2", color2)}
-            <br>
-            <p>
-                <strong>Parecido:</strong> {distanceRGB(color1, color2).toFixed(2)}%
-            </p>
-            <svg viewBox="-50 -50 100 100">
-                <circle cx="0" cy="0" r="50" fill="#eee"></circle>
-                <circle cx={pos1.x} cy={pos1.y} r="5" fill="red"></circle>
-                <circle cx={pos2.x} cy={pos2.y} r="5" fill="blue"></circle>
-            </svg>
-        </div>
-    {/if} -->
 </main>
+{#if debug}
+	<div class="fixed bottom-0 w-full bg-[#feea] flex flex-col z-50">
+		<label>
+			<span>dist. propia</span>
+			<input
+				type="range"
+				min="0"
+				max="100"
+				bind:value={game.player_closeness}
+			/>
+		</label>
+		<label>
+			<span>dist. más próxima</span>
+			<input type="range" min="0" max="100" bind:value={game.closest} />
+		</label>
+		<label>
+			<span>jugador más próximo</span>
+			<select bind:value={game.closest_client}>
+				{#each game.known_names.entries() as [id, name]}
+					<option value={id}>{name}</option>
+				{/each}
+			</select>
+		</label>
+	</div>
+{/if}
 
 <style lang="scss">
-	.score {
-		color: white;
-		font-size: 4em;
-		line-height: 1;
-		margin-top: -1rem;
-		font-weight: 900;
-		font-variant: tabular-nums;
-
-		[data-light="true"] & {
-			color: black;
-		}
-	}
-	.debug {
-		position: fixed;
-		left: 0;
-		bottom: 0;
-		background-color: #0002;
-		color: black;
-		padding: 0.5rem;
-		font-family: monospace;
-		line-height: 1.2;
-	}
-
-	.refs {
-		display: flex;
-	}
-	.ref {
-		display: inline-block;
-		vertical-align: middle;
-		width: 1.2em;
-		height: 1.2em;
-	}
-	.debug svg {
-		display: block;
-		width: 6rem;
-		height: 6rem;
-	}
-
 	.light-toggle {
 		--bg: hsl(50, 90%, 15%);
 		--border: hsl(50, 90%, 5%);
@@ -214,11 +191,5 @@
 		--bg: hsl(147, 100%, 50%);
 		--border: hsl(165, 100%, 35%);
 		--text: black;
-	}
-
-	.restart-button {
-		--bg: hsl(17, 100%, 50%);
-		--border: hsl(355, 100%, 35%);
-		--text: white;
 	}
 </style>
