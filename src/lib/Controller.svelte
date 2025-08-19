@@ -25,6 +25,10 @@
 	let headerColor: Color = $state([128, 128, 128]);
 	let color: Color = $state([128, 128, 128]);
 
+	const c = $derived(
+		`hsl(${(260 + game.player_closeness * 1.5) % 360}deg 100% 70%)`,
+	);
+
 	function check() {
 		game.guessColor(color);
 	}
@@ -64,15 +68,14 @@
 
 <main class="grid grid-rows-[auto_1fr_auto] bg-black h-full overflow-clip">
 	<header
-		style="--c: {winning ? 'var(--color-white)' : 'var(--color-green-950)'}"
+		style="--c: {c}"
 		class={{
-			"z-10 w-full pb-2": true,
-			"text-black": winning,
+			"z-10 w-full pb-2 text-black": true,
 		}}
 	>
 		<div class="bg-(--c) p-2 pb-0 flex justify-between">
 			<div
-				class="p-2 shrink-0 bg-white text-black rounded-lg grid grid-rows-2 font-mono font-bold text-4xl"
+				class="p-2 shrink-0 bg-gradient-to-r from-white to-transparent text-black rounded-2xl grid grid-rows-2 font-mono font-bold text-4xl"
 			>
 				<div class="flex gap-2 items-center">
 					<img

@@ -8,8 +8,8 @@
 	const { f }: Props = $props();
 
 	const MAX_WAVES = 10;
-	const WAVELENGTH = 10;
-	const AMPLITUDE = 5;
+	const WAVELENGTH = 15;
+	const AMPLITUDE = 4;
 
 	const BASE_DURATION = 300;
 
