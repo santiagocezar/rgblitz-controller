@@ -81,6 +81,7 @@ export default class Game extends EventEmitter<{
     }
 
     async handleMessage(topic: string, payload: Uint8Array) {
+        console.log(payload)
         if (payload[0] === HELLO) {
             const otherID = payload
                 .slice(1, 1 + PLAYER_ID_LEN)
@@ -151,7 +152,7 @@ export default class Game extends EventEmitter<{
 		const nameBytes = encoder.encode(this.player_name);
 		const data = new Uint8Array([HELLO, ...this.player_id, ...nameBytes]);
 		// @ts-expect-error it can actually handle the Uint8Array
-		await client.publishAsync("santiagocezar/rgblitz/clients", data);
+		await this.client.publishAsync("santiagocezar/rgblitz/clients", data);
 	}
 
 }
