@@ -32,6 +32,7 @@
 	function onRoundFinished(winner: string, score: number) {
 		makeToast({
 			message: winner,
+			type: "won",
 		});
 	}
 
@@ -80,9 +81,12 @@
 						class="h-12 drop-shadow-pink-400 drop-shadow-md"
 					/>
 					<span>
-						<NumberFlow value={game.score} /><span
-							class="text-base font-extrabold">pts.</span
-						>
+						<NumberFlow
+							format={{
+								useGrouping: false,
+							}}
+							value={game.score}
+						/><span class="text-base font-extrabold">pts.</span>
 					</span>
 				</div>
 				<div class="flex gap-2 items-center">
