@@ -22,9 +22,19 @@
 {#if game.player_name}
 	<Controller {game} />
 {:else}
-	<form action="#" onsubmit={login}>
-		<input type="text" bind:value={loginName} />
-		<button class="button">Subir</button>
+	<form
+		action="#"
+		onsubmit={login}
+		class="flex flex-col items-center justify-center h-full gap-2"
+	>
+		<label for="name" class="text-lg">Tu nombre:</label>
+		<input
+			id="name"
+			class="text-2xl border-b-2 border-white p-4"
+			type="text"
+			bind:value={loginName}
+		/>
+		<button class="button">Entrar</button>
 		<ul>
 			{#each game.known_names.values() as name}
 				<li>{name}</li>
