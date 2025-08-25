@@ -53,11 +53,19 @@
 			originY = 0;
 		let baseSize = 0;
 
-		function mapClientPosition(clientX: number, clientY: number) {
+		function mapClientPosition(
+			clientX: number,
+			clientY: number,
+			bounded = false,
+		) {
 			clientX = ((clientX - originX) / baseSize) * 2 - 1;
 			clientY = ((clientY - originY) / baseSize) * 2 - 1;
 
-			angle.value = Math.atan2(clientX, -clientY);
+			const nextAngle = Math.atan2(clientX, -clientY);
+
+			if (!bounded || Math.abs(angle.value - nextAngle) < Math.PI / 2) {
+				angle.value = Math.atan2(clientX, -clientY);
+			}
 		}
 
 		function stopMoving(ev: PointerEvent) {
@@ -79,7 +87,7 @@
 
 		function keepMoving(ev: PointerEvent) {
 			ev.preventDefault();
-			mapClientPosition(ev.clientX, ev.clientY);
+			mapClientPosition(ev.clientX, ev.clientY, true);
 		}
 
 		function addDocumentListeners() {
@@ -101,7 +109,7 @@
 </script>
 
 <div
-	class="aspect-square h-full grid"
+	class="aspect-square h-full grid rounded-full overflow-hidden"
 	style="
         --c: {c[color]};
         --true: {trueColor};
