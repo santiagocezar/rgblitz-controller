@@ -67,15 +67,12 @@
 />
 
 <main class="grid grid-rows-[auto_1fr_auto] bg-black h-full overflow-clip">
-	<header
-		style="--c: {c}"
-		class={{
-			"z-10 w-full pb-2 text-black": true,
-		}}
-	>
-		<div class="bg-(--c) p-2 pb-0 flex justify-between">
+	<header style="--c: {c}; --t: white" class="z-10 w-full pb-2 text-black">
+		<div
+			class="bg-linear-to-b/oklab from-(--t) to-(--c) p-2 pb-0 flex flex-col justify-between"
+		>
 			<div
-				class="p-2 shrink-0 bg-gradient-to-r from-white to-transparent text-black rounded-2xl grid grid-rows-2 font-mono font-bold text-4xl"
+				class="p-2 shrink-0 text-black grid grid-cols-2 font-mono font-bold text-4xl"
 			>
 				<div class="flex gap-2 items-center">
 					<img
