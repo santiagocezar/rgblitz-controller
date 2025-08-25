@@ -7,7 +7,7 @@ const HELLO = 1;
 // ciiiirgb  c: command, i: client id, rgb: color
 const GUESS_COLOR = 2;
 // ciiiirgbd c: command, i: client id, rgb: color, d: distance
-const CLOSEST_GUESS = 3;
+const GUESS_RESULT = 3;
 // ciiii...  c: command, i: client id, ...: display name
 const HELLO_ACK = 4;
 // crgb      c: command, rgb: color
@@ -26,8 +26,11 @@ function scoreFromCloseness(closeness: number): number {
 export default class Game extends EventEmitter<{
     roundStart(): void
     roundFinished(winner: string, score: number): void
+    guessResult(client: string, closeness: number): void
 }> {
-    player_id: Uint8Array
+    #player_id: Uint8Array = $state(new Uint8Array)
+    
+    player_id = $derived(this.#player_id.toString())
     
     player_name = $state("")
 
@@ -46,22 +49,21 @@ export default class Game extends EventEmitter<{
     constructor() {
         super()
 
-        this.player_id = new Uint8Array(PLAYER_ID_LEN);
-        crypto.getRandomValues(this.player_id);
+        const player_id = new Uint8Array(PLAYER_ID_LEN);
+        crypto.getRandomValues(player_id);
+        this.#player_id = player_id
     }
 
-    async init() {
-        this.client = await mqtt.connectAsync("wss://broker.emqx.io:8084/mqtt", {
+    init() {
+        this.client = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
             username: "santiagocezar",
             password: "rgblitz0401",
         });
-
-        await Promise.all([
-            this.client.subscribeAsync("santiagocezar/rgblitz/clients"),
-            this.client.subscribeAsync("santiagocezar/rgblitz/game"),
-        ])
         
-		this.client.on("message", this.#onMessage);
+        this.client.on("message", this.#onMessage);
+
+        this.client.subscribe("santiagocezar/rgblitz/clients")
+        this.client.subscribe("santiagocezar/rgblitz/game")  
     }
 
 
@@ -75,19 +77,17 @@ export default class Game extends EventEmitter<{
 
     async login(name: string) {
         this.player_name = name
-		this.known_names.set(this.player_id.toString(), this.player_name);
+		this.known_names.set(this.player_id, this.player_name);
 
 		await this.#sendHello();
     }
 
     async handleMessage(topic: string, payload: Uint8Array) {
-        console.log(payload)
         if (payload[0] === HELLO) {
             const otherID = payload
                 .slice(1, 1 + PLAYER_ID_LEN)
                 .toString();
             const decoder = new TextDecoder();
-            console.log(otherID);
             const name = decoder.decode(payload.slice(1 + PLAYER_ID_LEN));
 
             console.log(`it's ${otherID} aka ${name}`);
@@ -97,21 +97,31 @@ export default class Game extends EventEmitter<{
             if (!this.known_names.has(otherID) && this.player_name) {
                 await this.#sendHello();
             }
-        } else if (payload[0] === CLOSEST_GUESS) {
+        } else if (payload[0] === GUESS_RESULT) {
             const otherID = payload
-                .slice(1, 1 + this.player_id.length)
+                .slice(1, 1 + PLAYER_ID_LEN)
                 .toString();
-            this.closest = payload[8];
-            this.closest_client = otherID;
-            if (
-                otherID === this.player_id.toString() &&
-                this.closest > this.player_closeness
-            ) {
-                this.player_closeness = this.closest;
+
+                
+            const closeness = payload[8] & 0b01111111
+            const is_closest = (payload[8] & 0b10000000) > 0
+            
+            console.log(`closeness is ${payload[8]} but actually ${closeness}`)
+            
+            this.emit("guessResult", otherID, closeness);
+                
+            if (is_closest) {
+                this.closest_client = otherID;
+                this.closest = closeness;
             }
-            if (this.closest > 80) {
-                const score = scoreFromCloseness(this.closest)
-                if (otherID === this.player_id.toString()) {
+
+            if (otherID === this.player_id) {
+                this.player_closeness = closeness;
+            }
+            
+            if (closeness > 80) {
+                const score = scoreFromCloseness(closeness)
+                if (otherID === this.player_id) {
                     this.score += score
                 }
                 this.emit("roundFinished", this.closest_name!, score);
@@ -120,7 +130,7 @@ export default class Game extends EventEmitter<{
             const view = new DataView(payload.buffer);
             const remaining = view.getUint8(1);
             const restart = view.getUint8(2) === 1;
-            const timestamp = Number(view.getBigInt64(3));
+            // const timestamp = Number(view.getBigInt64(3));
             this.round_time = remaining;
             if (restart) {
                 this.closest_client = null;
@@ -128,15 +138,11 @@ export default class Game extends EventEmitter<{
                 this.player_closeness = 0;
                 this.emit("roundStart")
             }
-            console.log({
-                remaining,
-                time: new Date(timestamp * 1000),
-            });
         }
     }
 
 	async guessColor(color: Color) {
-		const data = new Uint8Array([GUESS_COLOR, ...this.player_id, ...color]);
+		const data = new Uint8Array([GUESS_COLOR, ...this.#player_id, ...color]);
 		// @ts-expect-error it can actually handle the Uint8Array
 		await this.client.publishAsync("santiagocezar/rgblitz/clients", data);
 	}
@@ -150,7 +156,7 @@ export default class Game extends EventEmitter<{
 		// console.log(`i'm ${clientID} aka ${name}`);
 		const encoder = new TextEncoder();
 		const nameBytes = encoder.encode(this.player_name);
-		const data = new Uint8Array([HELLO, ...this.player_id, ...nameBytes]);
+		const data = new Uint8Array([HELLO, ...this.#player_id, ...nameBytes]);
 		// @ts-expect-error it can actually handle the Uint8Array
 		await this.client.publishAsync("santiagocezar/rgblitz/clients", data);
 	}

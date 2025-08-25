@@ -9,6 +9,7 @@
 	import Game, { type Color } from "./game.svelte";
 	import NumberFlow from "@number-flow/svelte";
 	import { makeToast } from "./toasts/state.svelte";
+	import Loading from "./Loading.svelte";
 
 	interface Props {
 		game: Game;
@@ -17,6 +18,8 @@
 	const { game }: Props = $props();
 
 	let mix = $state(false);
+
+	let waiting: number | null = $state(null);
 
 	let debug = $state(false);
 
@@ -30,6 +33,9 @@
 	);
 
 	function check() {
+		waiting = window.setTimeout(() => {
+			waiting = null;
+		}, 2000);
 		game.guessColor(color);
 	}
 
@@ -50,6 +56,12 @@
 		document.addEventListener("keypress", onSpace);
 
 		game.on("roundFinished", onRoundFinished);
+		game.on("guessResult", (client) => {
+			if (client == game.player_id && waiting !== null) {
+				clearTimeout(waiting);
+				waiting = null;
+			}
+		});
 
 		return () => {
 			document.removeEventListener("keypress", onSpace);
@@ -132,7 +144,7 @@
 		<ColorDials bind:color expand={mix} />
 	</div>
 
-	<header class="z-10 flex gap-2 text-4xl items-center p-2">
+	<header class="z-10 grid grid-cols-2 gap-2 text-4xl items-center p-2">
 		<!-- <button onclick={reset} class="restart-button">
 			<Refresh />
 		</button> -->
@@ -140,15 +152,23 @@
 		<button
 			onclick={() => (mix = !mix)}
 			data-mix={mix || undefined}
-			class="grow flex items-center justify-center h-auto py-4 rounded-3xl bg-amber-950 data-mix:bg-amber-200 data-mix:text-black"
+			class="h-full grow flex items-center justify-center py-4 rounded-3xl bg-amber-950 data-mix:bg-amber-200 data-mix:text-black"
 		>
 			<Bulb />
 		</button>
 		<button
 			onclick={check}
-			class="grow flex items-center justify-center h-auto py-4 rounded-3xl bg-teal-400 text-black"
+			class={{
+				"h-full  grow flex items-center justify-center py-4 rounded-3xl bg-teal-400 text-black transition-opacity": true,
+				"opacity-60": waiting,
+			}}
+			disabled={waiting}
 		>
-			<Tick />
+			{#if waiting}
+				<Loading class="h-[1.5em]" />
+			{:else}
+				<Tick />
+			{/if}
 		</button>
 	</header>
 </main>
