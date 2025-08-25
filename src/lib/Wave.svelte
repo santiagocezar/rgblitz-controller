@@ -82,7 +82,7 @@
 <svg viewBox="0 0 {WAVELENGTH * MAX_WAVES} {AMPLITUDE * 3}">
 	<defs>
 		<filter id="r" x="0" y="0" xmlns="http://www.w3.org/2000/svg">
-			<feGaussianBlur in="SourceGraphic" result="main" stdDeviation="2" />
+			<!-- <feGaussianBlur in="SourceGraphic" result="main" stdDeviation="2" /> -->
 			<feColorMatrix
 				in="main"
 				type="matrix"
@@ -93,7 +93,7 @@
 			/>
 		</filter>
 		<filter id="g" x="0" y="0" xmlns="http://www.w3.org/2000/svg">
-			<feGaussianBlur in="SourceGraphic" result="main" stdDeviation="2" />
+			<!-- <feGaussianBlur in="SourceGraphic" result="main" stdDeviation="2" /> -->
 			<feColorMatrix
 				in="main"
 				type="matrix"
@@ -104,7 +104,7 @@
 			/>
 		</filter>
 		<filter id="b" x="0" y="0" xmlns="http://www.w3.org/2000/svg">
-			<feGaussianBlur in="SourceGraphic" result="main" stdDeviation="2" />
+			<!-- <feGaussianBlur in="SourceGraphic" result="main" stdDeviation="2" /> -->
 			<feColorMatrix
 				in="main"
 				type="matrix"
