@@ -45,15 +45,6 @@
 					progress += (difftime % lastduration) / lastduration;
 				}
 
-				console.log({
-					f,
-					duration,
-					currenttime,
-					lasttime,
-					lastduration,
-					progress,
-				});
-
 				anim?.cancel();
 				anim = node.animate(
 					[
