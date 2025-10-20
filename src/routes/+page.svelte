@@ -22,6 +22,7 @@
 {#if game.player_name}
 	<Controller {game} />
 {:else}
+<!-- TODO: nombre tipo arcade -->
 	<form
 		action="#"
 		onsubmit={login}
@@ -30,8 +31,10 @@
 		<label for="name" class="text-lg">Tu nombre:</label>
 		<input
 			id="name"
-			class="text-2xl border-b-2 border-white p-4"
+			class="w- text-8xl font-mono uppercase border-b-2 border-white p-4"
 			type="text"
+			size="3"
+			maxlength="3"
 			bind:value={loginName}
 		/>
 		<button class="button">Entrar</button>

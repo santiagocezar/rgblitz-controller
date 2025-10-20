@@ -162,7 +162,7 @@
 				"h-full  grow flex items-center justify-center py-4 rounded-3xl bg-teal-400 text-black transition-opacity": true,
 				"opacity-60": waiting,
 			}}
-			disabled={waiting}
+			disabled={waiting !== null}
 		>
 			{#if waiting}
 				<Loading class="h-[1.5em]" />
@@ -198,7 +198,7 @@
 	</div>
 {/if}
 
-<style lang="scss">
+<style>
 	.light-toggle {
 		--bg: hsl(50, 90%, 15%);
 		--border: hsl(50, 90%, 5%);
