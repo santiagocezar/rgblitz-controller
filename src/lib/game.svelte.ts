@@ -8,14 +8,12 @@ const HELLO = 1;
 const GUESS_COLOR = 2;
 // ciiiirgbd c: command, i: client id, rgb: color, d: distance
 const GUESS_RESULT = 3;
-// ciiii...  c: command, i: client id, ...: display name
-const HELLO_ACK = 4;
-// crgb      c: command, rgb: color
-const SET_SECRET_COLOR = 5;
 // crstttttttt      c: command, r: remaining, s: restart, t: timestamp
 const TICK = 6;
 // cdTrgbtttttttt  c: command, d: difficulty, T: remaining, t: timestamp
 const ROUND_START = 7;
+// cdTrgbtttttttt  c: command, d: difficulty, T: remaining, t: timestamp
+const ROUND_CONFIG = 8;
 
 const PLAYER_ID_LEN = 4;
 
@@ -29,6 +27,13 @@ type Message =
 	  }
 	| {
 			type: "RoundStart";
+			difficulty: number;
+			remaining: number;
+			secret: Color;
+			now: Date;
+	  }
+	| {
+			type: "RoundConfig";
 			difficulty: number;
 			remaining: number;
 			secret: Color;
@@ -53,6 +58,12 @@ function scoreFromCloseness(closeness: number): number {
 
 function parseMessage(payload: Uint8Array): Message | null {
 	const type = payload[0];
+	const view = new DataView(
+		payload.buffer.slice(
+			payload.byteOffset,
+			payload.byteOffset + payload.byteLength
+		)
+	);
 	if (type === HELLO) {
 		const client = payload.slice(1, 1 + PLAYER_ID_LEN).toString();
 		const decoder = new TextDecoder();
@@ -78,9 +89,9 @@ function parseMessage(payload: Uint8Array): Message | null {
 			closest,
 		};
 	} else if (type === TICK) {
-		const view = new DataView(payload.buffer);
-		const remaining = view.getUint8(1);
-		const now = new Date(Number(view.getBigInt64(3)));
+		const remaining = payload[1];
+		const int = view.getBigInt64(2, false);
+		const now = new Date(Number(int) * 1000);
 
 		return {
 			type: "Tick",
@@ -88,7 +99,6 @@ function parseMessage(payload: Uint8Array): Message | null {
 			now,
 		};
 	} else if (type === ROUND_START) {
-		const view = new DataView(payload.buffer);
 		let i = 1;
 		const difficulty = view.getUint8(i++);
 		const remaining = view.getUint8(i++);
@@ -97,6 +107,20 @@ function parseMessage(payload: Uint8Array): Message | null {
 
 		return {
 			type: "RoundStart",
+			difficulty,
+			remaining,
+			secret: [secretBuf[0], secretBuf[1], secretBuf[2]],
+			now,
+		};
+	} else if (type === ROUND_CONFIG) {
+		let i = 1;
+		const difficulty = view.getUint8(i++);
+		const remaining = view.getUint8(i++);
+		const secretBuf = payload.slice(i, (i += 3));
+		const now = new Date(Number(view.getBigInt64(i)));
+
+		return {
+			type: "RoundConfig",
 			difficulty,
 			remaining,
 			secret: [secretBuf[0], secretBuf[1], secretBuf[2]],
@@ -131,6 +155,10 @@ export default class Game extends EventEmitter<{
 	);
 	closest = $state(0);
 	player_closeness = $state(0);
+
+	tickInterval: number | null = null;
+	lastLocalTickTime: Date | null = null;
+	lastRemoteTickTime: Date | null = null;
 
 	client: mqtt.MqttClient | null = null;
 
@@ -173,10 +201,36 @@ export default class Game extends EventEmitter<{
 		await this.#sendHello();
 	}
 
-	async handleMessage(topic: string, payload: Uint8Array) {
-		let msg: Message | null = parseMessage(payload);
+	tick = () => {
+		this.lastLocalTickTime = new Date();
+		this.round_time = Math.max(0, this.round_time - 1);
+	};
 
+	syncTimer() {
+		this.lastLocalTickTime = new Date();
+
+		if (!this.lastRemoteTickTime) return;
+
+		const setupInterval = () => {
+			if (this.tickInterval != null) {
+				clearInterval(this.tickInterval);
+			}
+
+			this.tick();
+			this.tickInterval = window.setInterval(this.tick, 1000);
+		};
+
+		const deltaT =
+			this.lastLocalTickTime.getTime() -
+			this.lastRemoteTickTime.getTime();
+
+		setTimeout(setupInterval, Math.max(0, 1000 - deltaT));
+	}
+
+	async handleMessage(msg: Message) {
 		if (!msg) return;
+
+		console.log(msg);
 
 		if (msg.type === "RoundStart") {
 			this.difficulty == msg.difficulty;
@@ -184,6 +238,9 @@ export default class Game extends EventEmitter<{
 			this.closest_client = null;
 			this.closest = 0;
 			this.player_closeness = 0;
+		} else if (msg.type === "RoundConfig") {
+			this.difficulty == msg.difficulty;
+			this.round_time = msg.remaining;
 		} else if (msg.type === "Hello") {
 			const { client, name } = msg;
 
@@ -197,7 +254,7 @@ export default class Game extends EventEmitter<{
 		} else if (msg.type == "GuessResult") {
 			const { client, closeness, closest } = msg;
 
-			console.log(`closeness is ${payload[8]} but actually ${closeness}`);
+			// console.log(`closeness is ${payload[8]} but actually ${closeness}`);
 
 			this.emit("guessResult", client, closeness);
 
@@ -218,10 +275,25 @@ export default class Game extends EventEmitter<{
 				this.emit("roundFinished", this.closest_name!, score);
 			}
 		} else if (msg.type === "Tick") {
-			this.round_time = msg.remaining;
-		}
+			this.lastRemoteTickTime = msg.now;
+			if (this.tickInterval == null) {
+				this.syncTimer();
 
-		this.emit("message", msg);
+				this.round_time = msg.remaining;
+			} else if (this.lastLocalTickTime) {
+				const deltaT =
+					this.lastRemoteTickTime.getTime() -
+					this.lastLocalTickTime.getTime();
+
+				if (deltaT > 100) {
+					console.log("time diff with ESP32:", deltaT / 1000);
+
+					this.syncTimer();
+
+					this.round_time = msg.remaining;
+				}
+			}
+		}
 	}
 
 	async guessColor(color: Color) {
@@ -235,7 +307,13 @@ export default class Game extends EventEmitter<{
 	}
 
 	#onMessage: mqtt.OnMessageCallback = (topic, payload) => {
-		this.handleMessage(topic, new Uint8Array(payload));
+		let msg: Message | null = parseMessage(payload);
+
+		if (!msg) return;
+
+		this.handleMessage(msg);
+
+		this.emit("message", msg);
 	};
 
 	async #sendHello() {
@@ -245,5 +323,9 @@ export default class Game extends EventEmitter<{
 		const data = new Uint8Array([HELLO, ...this.#player_id, ...nameBytes]);
 		// @ts-expect-error it can actually handle the Uint8Array
 		await this.client.publishAsync("santiagocezar/rgblitz/clients", data);
+	}
+
+	[Symbol.dispose]() {
+		this.tickInterval && clearInterval(this.tickInterval);
 	}
 }
