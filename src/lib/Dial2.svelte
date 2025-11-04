@@ -121,7 +121,7 @@
 	<div
 		class={{
 			"w-full h-full fill bg-[var(--true)] rounded-full transition-transform z-2 mix-blend-screen pointer-events-none": true,
-			"scale-230": expand,
+			"scale-150": expand,
 		}}
 	></div>
 	<svg

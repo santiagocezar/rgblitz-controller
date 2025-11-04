@@ -10,6 +10,7 @@
 	import NumberFlow from "@number-flow/svelte";
 	import { makeToast } from "./toasts/state.svelte";
 	import Loading from "./Loading.svelte";
+	import Triangles from "./Triangles.svelte";
 
 	interface Props {
 		game: Game;
@@ -68,8 +69,10 @@
 			game.off("roundFinished", onRoundFinished);
 		};
 	});
+	let f = $state(0);
 </script>
 
+<input type="range" min="0" max="1" step="any" bind:value={f} />
 <!-- <audio bind:this={audio} src={bingbong}></audio> -->
 
 <svelte:document
@@ -78,98 +81,103 @@
 	}}
 />
 
-<main class="grid grid-rows-[auto_1fr_auto] bg-black h-full overflow-clip">
-	<header style="--c: {c}; --t: white" class="z-10 w-full pb-2 text-black">
-		<div
-			class="bg-linear-to-b/oklab from-(--t) to-(--c) p-2 pb-0 flex flex-col justify-between"
-		>
-			<div
-				class="p-2 shrink-0 text-black grid grid-cols-2 font-mono font-bold text-4xl"
-			>
-				<div class="flex gap-2 items-center">
-					<img
-						src={star}
-						alt="puntos:"
-						class="h-12 drop-shadow-pink-400 drop-shadow-md"
-					/>
-					<span>
-						<NumberFlow
-							format={{
-								useGrouping: false,
-							}}
-							value={game.score}
-						/><span class="text-base font-extrabold">pts.</span>
-					</span>
-				</div>
-				<div class="flex gap-2 items-center">
-					<img
-						src={clock}
-						alt="puntos:"
-						class="h-12 drop-shadow-yellow-300 drop-shadow-md"
-					/>
-					<span>
-						{game.round_time}<span class="text-base font-extrabold"
-							>s</span
-						>
-					</span>
-				</div>
+<main
+	class="grid grid-rows-[1fr_auto] md:grid-rows-1 md:grid-cols-[1fr_auto] bg-black h-full overflow-hidden"
+>
+	<header class="relative w-full h-full">
+		<div class="absolute top-4 left-4 flex flex-col">
+			<div class="flex gap-2 items-center font-mono font-bold text-4xl">
+				<img
+					src={star}
+					alt="puntos:"
+					class="h-12 drop-shadow-pink-400 drop-shadow-md"
+				/>
+				<span>
+					<NumberFlow
+						format={{
+							useGrouping: false,
+						}}
+						value={game.score}
+					/><span class="text-base font-extrabold">pts.</span>
+				</span>
 			</div>
-			<div class="flex flex-col items-end text-right gap-2 p-2">
-				<div class="text-lg">
-					{#if winning}
-						¡estás ganando!
-					{:else}
-						{game.closest_name} está más cerca
-					{/if}
-				</div>
-				<div
-					class={{
-						"text-3xl/8 font-bold": true,
-						"animate-bounce": game.player_closeness > 60,
-					}}
-				>
-					{game.player_closeness > 80 ? "¡¡GANASTE!!"
-					: game.player_closeness > 70 ? "¡¡QUEMANDO!!"
-					: game.player_closeness > 60 ? "¡Caliente!"
-					: game.player_closeness > 50 ? "Tibio..."
-					: game.player_closeness > 20 ? "Frío"
-					: "Muy frio, helado."}
-				</div>
+			<div class="flex gap-2 items-center font-mono font-bold text-4xl">
+				<img
+					src={clock}
+					alt="puntos:"
+					class="h-12 drop-shadow-yellow-300 drop-shadow-md"
+				/>
+				<span>
+					{game.round_time}<span class="text-base font-extrabold"
+						>s</span
+					>
+				</span>
 			</div>
 		</div>
-		<Wave f={game.player_closeness / 100} />
+		<div class="absolute top-4 right-4 text-right z-10 text-white">
+			<div
+				class={{
+					"text-3xl/8 font-bold": true,
+					"animate-bounce": game.player_closeness > 60,
+				}}
+			>
+				{game.player_closeness > game.difficulty ? "¡¡GANASTE!!"
+				: game.player_closeness > 70 ? "¡¡QUEMANDO!!"
+				: game.player_closeness > 60 ? "¡Caliente!"
+				: game.player_closeness > 50 ? "Tibio..."
+				: game.player_closeness > 20 ? "Frío"
+				: "Muy frio, helado."}
+			</div>
+			<div class="text-lg">
+				{#if winning}
+					¡estás ganando!
+				{:else}
+					{game.closest_name} está más cerca
+				{/if}
+			</div>
+
+			<!-- <Wave f={game.player_closeness / 100} /> -->
+		</div>
+
+		<div class="absolute inset-0 grid items-center p-2">
+			<ColorDials bind:color expand={mix} />
+		</div>
 	</header>
 
-	<div class="h-full grid items-center p-2">
-		<ColorDials bind:color expand={mix} />
-	</div>
-
-	<header class="z-10 grid grid-cols-2 gap-2 text-4xl items-center p-2">
+	<header
+		style="--c: white"
+		class="flex flex-col md:flex-row md:w-40 overflow-hidden z-10"
+	>
+		<Triangles {f} />
 		<!-- <button onclick={reset} class="restart-button">
 			<Refresh />
 		</button> -->
 		<!-- <div class="grow"></div> -->
-		<button
-			onclick={() => (mix = !mix)}
-			data-mix={mix || undefined}
-			class="h-full grow flex items-center justify-center py-4 rounded-3xl bg-amber-950 data-mix:bg-amber-200 data-mix:text-black"
+		<div
+			class="bg-white md:grow shrink-0 flex flex-row md:flex-col md:justify-end gap-2 text-4xl p-2"
 		>
-			<Bulb />
-		</button>
-		<button
-			onclick={check}
-			class={{
-				"h-full  grow flex items-center justify-center py-4 rounded-3xl bg-teal-400 text-black transition-opacity": true,
-				"opacity-60": waiting,
-			}}
-			disabled={waiting !== null}
-		>
-			{#if waiting}
-				<Loading class="h-[1.5em]" />
-			{:else}
-				<Tick />
-			{/if}
-		</button>
+			<button
+				onclick={() => (mix = !mix)}
+				data-mix={mix || undefined}
+				class="max-md:grow flex items-center justify-center py-4 md:py-8 rounded-3xl bg-amber-950 data-mix:bg-amber-200 data-mix:text-black"
+			>
+				<Bulb />
+			</button>
+			<button
+				onclick={check}
+				class={{
+					"max-md:grow flex items-center justify-center py-4 md:py-8 rounded-3xl bg-teal-400 text-black transition-opacity": true,
+					"opacity-60": waiting,
+				}}
+				disabled={waiting !== null}
+			>
+				{#if waiting}
+					<Loading class="h-[1.5em]" />
+				{:else}
+					<Tick />
+				{/if}
+			</button>
+		</div>
 	</header>
 </main>
 {#if debug}
