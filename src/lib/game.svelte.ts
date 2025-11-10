@@ -58,6 +58,7 @@ function scoreFromCloseness(closeness: number): number {
 
 function parseMessage(payload: Uint8Array): Message | null {
 	const type = payload[0];
+	console.log(payload);
 
 	const view = new DataView(
 		payload.buffer.slice(
@@ -253,6 +254,7 @@ export default class Game extends EventEmitter<{
 			const { client, closeness, closest } = msg;
 
 			// console.log(`closeness is ${payload[8]} but actually ${closeness}`);
+			console.log({ client, player_id: this.player_id });
 
 			if (closest) {
 				this.closest_client = client;
@@ -303,7 +305,13 @@ export default class Game extends EventEmitter<{
 	}
 
 	#onMessage: mqtt.OnMessageCallback = (topic, payload) => {
-		let msg: Message | null = parseMessage(new Uint8Array(payload.buffer));
+		let msg: Message | null = parseMessage(
+			new Uint8Array(
+				payload.buffer,
+				payload.byteOffset,
+				payload.byteLength
+			)
+		);
 
 		if (!msg) return;
 
