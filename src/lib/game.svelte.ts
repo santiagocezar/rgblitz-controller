@@ -58,6 +58,7 @@ function scoreFromCloseness(closeness: number): number {
 
 function parseMessage(payload: Uint8Array): Message | null {
 	const type = payload[0];
+
 	const view = new DataView(
 		payload.buffer.slice(
 			payload.byteOffset,
@@ -134,7 +135,6 @@ function parseMessage(payload: Uint8Array): Message | null {
 export default class Game extends EventEmitter<{
 	message(data: Message): void;
 	roundFinished(winner: string, score: number): void;
-	guessResult(client: string, closeness: number): void;
 }> {
 	#player_id: Uint8Array = $state(new Uint8Array());
 
@@ -171,14 +171,14 @@ export default class Game extends EventEmitter<{
 	}
 
 	init() {
-		// this.client = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
-		// 	username: "santiagocezar",
-		// 	password: "rgblitz0401",
-		// });
-		this.client = mqtt.connect("wss://e123.cez.ar/mqtt", {
+		this.client = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
 			username: "santiagocezar",
 			password: "rgblitz0401",
 		});
+		// this.client = mqtt.connect("wss://e123.cez.ar/mqtt", {
+		// 	username: "santiagocezar",
+		// 	password: "rgblitz0401",
+		// });
 
 		this.client.on("message", this.#onMessage);
 
@@ -228,18 +228,16 @@ export default class Game extends EventEmitter<{
 	}
 
 	async handleMessage(msg: Message) {
-		if (!msg) return;
-
-		console.log(msg);
+		console.log("message:", msg);
 
 		if (msg.type === "RoundStart") {
-			this.difficulty == msg.difficulty;
+			this.difficulty = msg.difficulty;
 			this.round_time = msg.remaining;
 			this.closest_client = null;
 			this.closest = 0;
 			this.player_closeness = 0;
 		} else if (msg.type === "RoundConfig") {
-			this.difficulty == msg.difficulty;
+			this.difficulty = msg.difficulty;
 			this.round_time = msg.remaining;
 		} else if (msg.type === "Hello") {
 			const { client, name } = msg;
@@ -256,8 +254,6 @@ export default class Game extends EventEmitter<{
 
 			// console.log(`closeness is ${payload[8]} but actually ${closeness}`);
 
-			this.emit("guessResult", client, closeness);
-
 			if (closest) {
 				this.closest_client = client;
 				this.closest = closeness;
@@ -267,7 +263,7 @@ export default class Game extends EventEmitter<{
 				this.player_closeness = closeness;
 			}
 
-			if (closeness > this.difficulty) {
+			if (closeness >= this.difficulty) {
 				const score = scoreFromCloseness(closeness);
 				if (client === this.player_id) {
 					this.score += score;
@@ -307,7 +303,7 @@ export default class Game extends EventEmitter<{
 	}
 
 	#onMessage: mqtt.OnMessageCallback = (topic, payload) => {
-		let msg: Message | null = parseMessage(payload);
+		let msg: Message | null = parseMessage(new Uint8Array(payload.buffer));
 
 		if (!msg) return;
 

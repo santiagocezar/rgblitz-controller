@@ -57,10 +57,13 @@
 		document.addEventListener("keypress", onSpace);
 
 		game.on("roundFinished", onRoundFinished);
-		game.on("guessResult", (client) => {
-			if (client == game.player_id && waiting !== null) {
-				clearTimeout(waiting);
-				waiting = null;
+		game.on("message", (msg) => {
+			if (msg.type === "GuessResult") {
+				console.log("message evt:", { msg, id: game.player_id });
+				if (msg.client === game.player_id && waiting !== null) {
+					clearTimeout(waiting);
+					waiting = null;
+				}
 			}
 		});
 

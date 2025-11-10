@@ -109,7 +109,7 @@
 </script>
 
 <div
-	class="aspect-square h-full grid rounded-full overflow-hidden"
+	class="aspect-square h-full grid rounded-full"
 	style="
         --c: {c[color]};
         --true: {trueColor};
